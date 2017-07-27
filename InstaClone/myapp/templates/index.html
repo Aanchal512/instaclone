@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Instagram Clone</title>
+    <style>
+        body {
+        text-align: center;
+        Background: pink;
+        }
+    </style>
 </head>
 <body>
      <div class="main">
@@ -11,7 +17,7 @@
      </div>
      <div>
         <form method="post">
-
+            {% csrf_token %}
             <div>
                 <label for="username">Username: </label>
                 <input id="username" type="text" name="username" value={{ username }}>
