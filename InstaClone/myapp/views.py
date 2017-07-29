@@ -4,19 +4,25 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 
 # Create your views here.
-from django.shortcuts import render, redirect
-from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
-from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
+from django.shortcuts import render, redirect, render_to_response
+from django.template import RequestContext
+from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, searchform
+from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel, CommentLike, Search
 from django.contrib.auth.hashers import make_password, check_password
+from django.http import HttpResponse
 from InstaClone.settings import BASE_DIR
-from imgurpython import ImgurClient
 from datetime import timedelta, datetime
 from django.utils import timezone
+from django.contrib import messages
 from imgurpython import ImgurClient
+from clarifai import rest
+from clarifai.rest import ClarifaiApp
+from clarifai.rest import Image as ClImage
+from enum import Enum
+
 
 YOUR_CLIENT_ID = "3f41eb8f48dd41d"
 YOUR_CLIENT_SECRET = "24b5ccae12982b6de12f1db705be1d18b615824b"
-
 
 def signup_view(request):
     if request.method == "POST":
@@ -80,10 +86,41 @@ def post_view(request):
                 post = PostModel(user=user, image=image, caption=caption)
                 post.save()
 
-                path = str(BASE_DIR + post.image.url)
+
+                path = str(BASE_DIR + "/" + post.image.url)
 
                 client = ImgurClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET)
                 post.image_url = client.upload_from_path(path, anon=True)['link']
+                print(post.image_url)
+                post.save()
+
+                app = ClarifaiApp(api_key='c68ba2b17ce44ecdb42d94117d48a4ca')
+                model = app.models.get('general-v1.3')
+                response = model.predict_by_url(url=post.image_url)
+
+                arr = response['outputs'][0]['data']['concepts']
+                print arr
+                for i in range(0, 10):
+                    category = arr[i]['name']
+                    print category
+                    if category == 'nature':
+                        post.category = category
+
+                        break
+                    elif category == 'technology':
+                        post.category = category
+
+                        break
+                    elif category == 'food':
+                        post.category = category
+                        break
+                    elif category == 'sports':
+                        post.category = category
+
+                        break
+                    elif category == 'vehicle':
+                        post.category = category
+
                 post.save()
 
                 return redirect('/feed/')
@@ -121,6 +158,7 @@ def like_view(request):
             existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
             if not existing_like:
                 LikeModel.objects.create(post_id=post_id, user=user)
+
             else:
                 existing_like.delete()
             return redirect('/feed/')
@@ -154,3 +192,48 @@ def check_validation(request):
                 return session.user
     else:
         return None
+
+def logout_view(request):
+    user = check_validation(request)
+    if user is not None:
+        latest_session = SessionToken.objects.filter(user=user).last()
+        if latest_session:
+            latest_session.delete()
+
+    return redirect("/login/")
+
+def commentlike_view(request):
+
+    user = check_validation(request)
+    if user and request.method == 'POST':
+        form = commentlikeform(request.POST)
+        if form.is_valid():
+            comment_id = form.cleaned_data.get('comment').id
+
+            existing_like = CommentLike.objects.filter(comment_id=comment_id, user=user).first()
+
+            if not existing_like:
+                CommentLike.objects.create(comment_id=comment_id, user=user)
+            else:
+                existing_like.delete()
+
+            return redirect('/feed/')
+
+    else:
+        return redirect('/login/')
+
+def search_view(request):
+    return render(request, 'search.html', {'form': form})
+
+
+
+
+def search1_view(request):
+
+    user = check_validation(request)
+    if user and request.method == 'POST':
+        form = searchform(request.POST)
+        if form.is_valid():
+            search = request.POST('search')
+            print search
+            return render('/login/')  # Redirect after POST

@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 
 from myapp.views import signup_view, login_view, feed_view, post_view, like_view, comment_view
 
+
 urlpatterns = [
     url('post/', post_view),
     url('feed/', feed_view),
