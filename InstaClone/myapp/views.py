@@ -6,7 +6,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
-from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, searchform
+from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, searchform, commentlikeform
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel, CommentLike, Search
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpResponse
@@ -21,8 +21,11 @@ from clarifai.rest import Image as ClImage
 from enum import Enum
 
 
-YOUR_CLIENT_ID = "3f41eb8f48dd41d"
-YOUR_CLIENT_SECRET = "24b5ccae12982b6de12f1db705be1d18b615824b"
+YOUR_CLIENT_ID = "3f41eb8f48dd41d"                                #client id of imgur
+
+YOUR_CLIENT_SECRET = "24b5ccae12982b6de12f1db705be1d18b615824b"   #client secret of imgur
+
+#to signup for instaclone
 
 def signup_view(request):
     if request.method == "POST":
@@ -46,6 +49,8 @@ def signup_view(request):
 
     return render(request, 'index.html', {'form': form})
 
+
+#login to get access to instaclone
 
 def login_view(request):
     response_data = {}
@@ -73,6 +78,8 @@ def login_view(request):
     response_data['form'] = form
     return render(request, 'login.html', response_data)
 
+
+# For posting media
 
 def post_view(request):
     user = check_validation(request)
@@ -149,6 +156,8 @@ def feed_view(request):
         return redirect('/login/')
 
 
+# to like a post
+
 def like_view(request):
     user = check_validation(request)
     if user and request.method == 'POST':
@@ -165,6 +174,8 @@ def like_view(request):
     else:
         return redirect('/login/')
 
+
+#to comment on a post
 
 def comment_view(request):
     user = check_validation(request)
@@ -183,6 +194,7 @@ def comment_view(request):
 
 
 # For validating the session
+
 def check_validation(request):
     if request.COOKIES.get('session_token'):
         session = SessionToken.objects.filter(session_token=request.COOKIES.get('session_token')).first()
@@ -193,6 +205,8 @@ def check_validation(request):
     else:
         return None
 
+# for logging out the current user and deleting the session token
+
 def logout_view(request):
     user = check_validation(request)
     if user is not None:
@@ -201,6 +215,25 @@ def logout_view(request):
             latest_session.delete()
 
     return redirect("/login/")
+
+
+
+def search_view(request):
+    return render(request, 'search.html', {'form': form})
+
+
+def search1_view(request):
+
+    user = check_validation(request)
+    if user and request.method == 'POST':
+        form = searchform(request.POST)
+        if form.is_valid():
+            search = request.POST('search')
+            print search
+            return render('/login/')  # Redirect after POST
+
+
+#for upvote functionality
 
 def commentlike_view(request):
 
@@ -222,18 +255,3 @@ def commentlike_view(request):
     else:
         return redirect('/login/')
 
-def search_view(request):
-    return render(request, 'search.html', {'form': form})
-
-
-
-
-def search1_view(request):
-
-    user = check_validation(request)
-    if user and request.method == 'POST':
-        form = searchform(request.POST)
-        if form.is_valid():
-            search = request.POST('search')
-            print search
-            return render('/login/')  # Redirect after POST

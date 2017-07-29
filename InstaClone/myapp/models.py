@@ -75,11 +75,17 @@ class CommentModel(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     has_liked = False
 
+
+#Model to upvote comments
+
 class CommentLike(models.Model):
     comment = models.ForeignKey(CommentModel)
     user = models.ForeignKey(UserModel)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+
+
+#Model for search
 
 class Search(models.Model):
     category = models.CharField(max_length=30)
