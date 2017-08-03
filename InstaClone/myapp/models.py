@@ -40,7 +40,7 @@ class PostModel(models.Model):
 	image = models.FileField(upload_to='user_images')
 	image_url = models.CharField(max_length=255)
 	caption = models.CharField(max_length=240)
-	category = models.CharField(max_length=200, default="others")
+	category_post = models.CharField(max_length=200, default="others")
 	created_on = models.DateTimeField(auto_now_add=True)
 	updated_on = models.DateTimeField(auto_now=True)
 	has_liked = False
@@ -87,5 +87,6 @@ class CommentLike(models.Model):
 
 #Model for search
 
-class Search(models.Model):
-    category = models.CharField(max_length=30)
+class SearchModel(models.Model):
+	post = models.ForeignKey(PostModel, null=True)
+	category = models.CharField(max_length=30, default="others")

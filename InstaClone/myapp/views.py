@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, searchform, commentlikeform
-from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel, CommentLike, Search
+from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel, CommentLike, SearchModel
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpResponse
 from InstaClone.settings import BASE_DIR
@@ -219,18 +219,29 @@ def logout_view(request):
 
 
 def search_view(request):
-    return render(request, 'search.html', {'form': form})
-
-
-def search1_view(request):
-
-    user = check_validation(request)
-    if user and request.method == 'POST':
+    if request.method == "POST":
+        print 'POST'
         form = searchform(request.POST)
+        print form
         if form.is_valid():
-            search = request.POST('search')
-            print search
-            return render('/login/')  # Redirect after POST
+            print 'valid'
+            search = form.cleaned_data.get('category')
+            search1 = SearchModel(category=search)
+            print search1
+            search1.save()
+            posts = PostModel.objects.filter(category_post = search)
+            print posts
+            if posts:
+                return redirect('/category/',{'posts': posts})
+            else:
+                return render(request,'search.html',{'form': form})
+
+        else:
+            print 'INVALID'
+            return render(request,'search.html',{'form':form})
+    elif request.method == "GET":
+        form = searchform()
+        return render(request,'search.html',{'form': form})
 
 
 #for upvote functionality
@@ -255,3 +266,5 @@ def commentlike_view(request):
     else:
         return redirect('/login/')
 
+def category_view(request):
+    return render(request,'category.html')

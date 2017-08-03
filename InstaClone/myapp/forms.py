@@ -1,5 +1,5 @@
 from django import forms
-from models import UserModel, PostModel, LikeModel, CommentModel, Search, CommentLike
+from models import UserModel, PostModel, LikeModel, CommentModel, SearchModel, CommentLike
 
 
 class SignUpForm(forms.ModelForm):
@@ -33,7 +33,7 @@ class CommentForm(forms.ModelForm):
 
 class searchform(forms.ModelForm):
     class Meta:
-        model = Search
+        model = SearchModel
         fields = ['category']
 
 
