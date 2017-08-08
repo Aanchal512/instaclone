@@ -18,7 +18,14 @@
         {% csrf_token %}
         <input type="submit" class="btn-default btn" value="search">
     </form>
-
+    <div style="float:right">
+          <form align="right" name="form1" method="post" action="/login/">
+          {% csrf_token %}
+              <label>
+                  <button name="submit12" type="submit" value="logout">logout</button>
+              </label>
+          </form>
+      </div>
 
 
     {% for post in posts %}
