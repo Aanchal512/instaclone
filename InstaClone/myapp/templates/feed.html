@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <title>Feeds</title>
     <style>
-        body{
-        background: pink;
-        }
+    body {
+      text-align: center;
+      background: url("https://cdn.elegantthemes.com/blog/wp-content/uploads/2013/09/bg-9-full.jpg");
+      background-size: cover;
+      background-position: center;
+      color:white
+    }
+    div {
+    font-size:34px;
+    }
+    a{
+        color:black;
+    }
     </style>
 </head>
 <body>
@@ -50,7 +60,12 @@
                 {% endif %}
             </form>
         </div>
-
+            <div>
+            <p> User's Interest: </p>
+            {% for category in post.categories %}
+                <span> {{ category.category_text }} </span>
+            {% endfor %}
+        </div>
         <div>
             <form method="POST" action="/comment/">
                 {% csrf_token %}

@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, searchform, commentlikeform
-from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel, CommentLike, SearchModel
+from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel, CommentLike, SearchModel , CategoryModel
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpResponse
 from InstaClone.settings import BASE_DIR
@@ -79,6 +79,27 @@ def login_view(request):
     return render(request, 'login.html', response_data)
 
 
+def add_category(post):
+    app = ClarifaiApp(api_key='c68ba2b17ce44ecdb42d94117d48a4ca')
+    model = app.models.get("general-v1.3")
+    response = model.predict_by_url(url=post.image_url)
+
+    if response["status"]["code"] == 10000:
+        if response["outputs"]:
+            if response["outputs"][0]["data"]:
+                if response["outputs"][0]["data"]["concepts"]:
+                    for index in range(0, len(response["outputs"][0]["data"]["concepts"])):
+                        category = CategoryModel(post=post, category_text = response["outputs"][0]["data"]["concepts"][index]["name"])
+                        category.save()
+                else:
+                    print "No Concepts List Error"
+            else:
+                print "No Data List Error"
+        else:
+            print "No Outputs List Error"
+    else:
+        print "Response Code Error"
+
 # For posting media
 
 def post_view(request):
@@ -128,7 +149,11 @@ def post_view(request):
                     elif category == 'vehicle':
                         post.category = category
 
+                    elif category == 'art':
+                        post.category = category
+
                 post.save()
+                add_category(post)
 
                 return redirect('/feed/')
 

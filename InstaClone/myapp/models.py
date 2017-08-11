@@ -54,6 +54,10 @@ class PostModel(models.Model):
 	def comments(self):
 		return CommentModel.objects.filter(post=self).order_by('-created_on')
 
+	@property
+	def categories(self):
+		return CategoryModel.objects.filter(post=self)
+
 
 #Model for like
 
@@ -89,3 +93,7 @@ class CommentLike(models.Model):
 class SearchModel(models.Model):
 	post = models.ForeignKey(PostModel, null=True)
 	category = models.CharField(max_length=30, default="others")
+
+class CategoryModel(models.Model):
+    post = models.ForeignKey(PostModel)
+    category_text = models.CharField(max_length=555)

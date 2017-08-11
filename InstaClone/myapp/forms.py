@@ -34,7 +34,7 @@ class CommentForm(forms.ModelForm):
 class searchform(forms.ModelForm):
     class Meta:
         model = SearchModel
-        fields = ['post','category']
+        fields = ['category']
 
 
 #Form for upvote functionality
